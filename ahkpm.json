@@ -1,0 +1,15 @@
+{
+  "version": "1.0.1",
+  "description": "A unit testing framework for AutoHotkey",
+  "repository": "https://github.com/joshuacc/AutoHotUnit",
+  "website": "https://github.com/joshuacc/AutoHotUnit",
+  "license": "MIT",
+  "issueTracker": "https://github.com/joshuacc/AutoHotUnit/issues",
+  "include": "AutoHotUnit.ahk",
+  "author": {
+    "name": "Joshua Clanton",
+    "email": "",
+    "website": "https://joshuaclanton.dev"
+  },
+  "dependencies": {}
+}
