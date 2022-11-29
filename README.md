@@ -1,7 +1,7 @@
-# AutoHotUnit - A unit testing framework for AutoHotkey.
+# AutoHotUnit - A unit testing framework for AutoHotkey
 
 While there have been other unit testing frameworks for AutoHotkey, I found most
-of them a bit clumsy to work with. This is my attempt to bring modernize the 
+of them a bit clumsy to work with. This is my attempt to modernize the 
 way AutoHotkey unit testing is done.
 
 ## Features
