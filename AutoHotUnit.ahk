@@ -1,15 +1,11 @@
-﻿#NoEnv
-#SingleInstance, Force
-#Warn
-SetBatchLines, -1
-FileEncoding, UTF-8
+﻿#SingleInstance Force
+; #Warn All, StdOut
+FileEncoding("UTF-8")
 
-SetWorkingDir %A_ScriptDir%
-
-ahu := new AutoHotUnitManager(new AutoHotUnitCLIReporter())
+global ahu := AutoHotUnitManager(AutoHotUnitCLIReporter())
 
 class AutoHotUnitSuite {
-    assert := new AutoHotUnitAsserter()
+    assert := AutoHotUnitAsserter()
 
     ; Executed once before any tests execute
     beforeAll() {
@@ -46,12 +42,12 @@ class AutoHotUnitManager {
     RunSuites() {
         this.reporter.onRunStart()
         for i, suiteClass in this.suites {
-            suiteInstance := new suiteClass()
+            suiteInstance := suiteClass()
             suiteName := suiteInstance.__Class
             this.reporter.onSuiteStart(suiteName)
             
             testNames := []
-            for propertyName in suiteInstance.base {
+            for propertyName in suiteInstance.base.OwnProps() {
                 ; If the property name starts with an underscore, skip it
                 underScoreIndex := InStr(propertyName, "_")
                 if (underScoreIndex == 1) {
@@ -63,7 +59,7 @@ class AutoHotUnitManager {
                     continue
                 }
 
-                if (IsFunc(suiteInstance[propertyName])) {
+                if (GetMethod(suiteInstance, propertyName) is Func) {
                     testNames.push(propertyName)
                 }
             }
@@ -72,7 +68,7 @@ class AutoHotUnitManager {
 
             try {
                 suiteInstance.beforeAll()
-            } catch e {
+            } catch Error as e {
                 this.reporter.onTestResult("beforeAll", "failed", e)
                 continue
             }
@@ -80,21 +76,23 @@ class AutoHotUnitManager {
             for j, testName in testNames {
                 try {
                     suiteInstance.beforeEach()
-                } catch e {
+                } catch Error as e {
                     this.reporter.onTestResult(testName, "failed", "beforeEach", e)
                     continue
                 }
 
                 try {
-                    suiteInstance[testName]()
-                } catch e {
+                    local method := GetMethod(suiteInstance, testName)
+                    
+                    method(suiteInstance)
+                } catch Error as e {
                     this.reporter.onTestResult(testName, "failed", "test", e)
                     continue
                 }
 
                 try {
                     suiteInstance.afterEach()
-                } catch e {
+                } catch Error as e {
                     this.reporter.onTestResult(testName, "failed", "afterEach", e)
                     continue
                 }
@@ -104,7 +102,7 @@ class AutoHotUnitManager {
 
             try {
                 suiteInstance.afterAll()
-            } catch e {
+            } catch Error as e {
                 this.reporter.onTestResult("afterEach", "failed", e)
                 continue
             }
@@ -123,8 +121,8 @@ class AutoHotUnitCLIReporter {
     reset := "[0m"
 
     printLine(str) {
-        FileAppend, %str%, *, UTF-8
-        FileAppend, `r`n, *
+        FileAppend(str, "*", "UTF-8")
+        FileAppend("`r`n", "*")
     }
 
     onRunStart() {
@@ -151,8 +149,8 @@ class AutoHotUnitCLIReporter {
 
         this.printLine("  " prefix " " testName " " status this.reset)
         if (status == "failed") {
-            this.printLine(this.red "      " error this.reset)
-            this.failures.push(this.currentSuiteName "." testName " " where " failed:`r`n  " error)
+            this.printLine(this.red "      " error.Message this.reset)
+            this.failures.push(this.currentSuiteName "." testName " " where " failed:`r`n  " error.Message)
         }
     }
 
@@ -162,12 +160,12 @@ class AutoHotUnitCLIReporter {
     onRunComplete() {
         this.printLine("")
         postfix := "All tests passed." 
-        if (this.failures.Length() > 0) {
-            postfix := this.failures.Length() . " test(s) failed."
+        if (this.failures.Length > 0) {
+            postfix := this.failures.Length . " test(s) failed."
         }
         this.printLine("Test run complete. " postfix)
 
-        if (this.failures.Length() > 0) {
+        if (this.failures.Length > 0) {
             this.printLine("")
         }
 
@@ -175,44 +173,44 @@ class AutoHotUnitCLIReporter {
             this.printLine(this.red failure this.reset)
         }
 
-        Exit this.failures.Length()
+        Exit(this.failures.Length)
     }
 }
 
 class AutoHotUnitAsserter {
     equal(actual, expected) {
         if (actual != expected) {
-            throw "Assertion failed: " . actual . " != " . expected
+            throw Error("Assertion failed: " . actual . " != " . expected)
         }
     }
 
     notEqual(actual, expected) {
         if (actual == expected) {
-            throw "Assertion failed: " . actual . " == " . expected
+            throw Error("Assertion failed: " . actual . " == " . expected)
         }
     }
 
     isTrue(actual) {
         if (actual != true) {
-            throw "Assertion failed: " . actual . " is not true"
+            throw Error("Assertion failed: " . actual . " is not true")
         }
     }
 
     isFalse(actual) {
         if (actual == true) {
-            throw "Assertion failed: " . actual . " is not false"
+            throw Error("Assertion failed: " . actual . " is not false")
         }
     }
 
     isEmpty(actual) {
         if (actual != "") {
-            throw "Assertion failed: " . actual . " is not empty"
+            throw Error("Assertion failed: " . actual . " is not empty")
         }
     }
 
     notEmpty(actual) {
         if (actual == "") {
-            throw "Assertion failed: " . actual . " is empty"
+            throw Error("Assertion failed: " . actual . " is empty")
         }
     }
 
@@ -222,25 +220,25 @@ class AutoHotUnitAsserter {
     
     isAbove(actual, expected) {
         if (actual <= expected) {
-            throw "Assertion failed: " . actual . " is not above " . expected
+            throw Error("Assertion failed: " . actual . " is not above " . expected)
         }
     }
 
     isAtLeast(actual, expected) {
         if (actual < expected) {
-            throw "Assertion failed: " . actual . " is not at least " . expected
+            throw Error("Assertion failed: " . actual . " is not at least " . expected)
         }
     }
 
     isBelow(actual, expected) {
         if (actual >= expected) {
-            throw "Assertion failed: " . actual . " is not below " . expected
+            throw Error("Assertion failed: " . actual . " is not below " . expected)
         }
     }
 
     isAtMost(actual, expected) {
         if (actual > expected) {
-            throw "Assertion failed: " . actual . " is not at most " . expected
+            throw Error("Assertion failed: " . actual . " is not at most " . expected)
         }
     }
 }

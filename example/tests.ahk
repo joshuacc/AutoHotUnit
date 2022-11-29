@@ -1,15 +1,13 @@
-#NoEnv
-#SingleInstance, Force
-SendMode, Input
-SetBatchLines, -1
+#SingleInstance Force
+SendMode("Input")
 #Warn
 
 ; Include AutoHotUnit. The path will be different on your system.
-#Include, %A_ScriptDir%\..\AutoHotUnit.ahk
+#Include "%A_ScriptDir%\..\AutoHotUnit.ahk"
 
 ; Include each test file
 ; See individual test files for more information
-#Include, %A_ScriptDir%\math.test.ahk
+#Include "%A_ScriptDir%\math.test.ahk"
 
 ; Run all test suites
 ahu.RunSuites()

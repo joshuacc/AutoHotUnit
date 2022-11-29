@@ -1,9 +1,6 @@
-#NoEnv
-#SingleInstance, Force
-SendMode, Input
-SetBatchLines, -1
+#SingleInstance Force
 
-#Include, %A_ScriptDir%\math.ahk
+#Include "%A_ScriptDir%\math.ahk"
 
 ; Register the test suite with AutoHotUnit
 ahu.RegisterSuite(MathSuite)

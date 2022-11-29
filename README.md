@@ -17,7 +17,13 @@ way AutoHotkey unit testing is done.
 
 The recommended approach for installation is to use [ahkpm][].
 
+To get the latest version of AutoHotUnit (which requires AutoHotkey 2):
+
 `ahkpm install gh:joshuacc/AutoHotUnit`
+
+To get previous versions, which supports AutoHotkey 1:
+
+`ahkpm install gh:joshuacc/AutoHotUnit@1`
 
 ## Usage
 
