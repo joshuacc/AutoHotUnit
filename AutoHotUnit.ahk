@@ -1,5 +1,5 @@
 ﻿#SingleInstance Force
-; #Warn All, StdOut
+#Warn All, StdOut
 FileEncoding("UTF-8")
 
 global ahu := AutoHotUnitManager(AutoHotUnitCLIReporter())
@@ -69,7 +69,7 @@ class AutoHotUnitManager {
             try {
                 suiteInstance.beforeAll()
             } catch Error as e {
-                this.reporter.onTestResult("beforeAll", "failed", e)
+                this.reporter.onTestResult("beforeAll", "failed", "", e)
                 continue
             }
 
@@ -103,7 +103,7 @@ class AutoHotUnitManager {
             try {
                 suiteInstance.afterAll()
             } catch Error as e {
-                this.reporter.onTestResult("afterEach", "failed", e)
+                this.reporter.onTestResult("afterAll", "failed", "", e)
                 continue
             }
 
@@ -139,7 +139,7 @@ class AutoHotUnitCLIReporter {
 
     onTestResult(testName, status, where, error) {
         if (status != "passed" && status != "failed") {
-            throw "Invalid status: " . status
+            throw Error("Invalid status: " . status)
         }
 
         prefix := this.green . "."
@@ -178,9 +178,43 @@ class AutoHotUnitCLIReporter {
 }
 
 class AutoHotUnitAsserter {
+    static deepEqual(actual, expected) {
+        if (actual is Array && expected is Array) {
+            if (actual.Length != expected.Length) {
+                return false
+            }
+
+            for i, actualItem in actual {
+                if (!this.deepEqual(actualItem, expected[i])) {
+                    return false
+                }
+            }
+
+            return true
+        }
+
+        return actual == expected
+    }
+
+    static getPrintableValue(value) {
+        if (value is Array) {
+            str := "["
+            for i, item in value {
+                if (i > 1) {
+                    str .= ", "
+                }
+                str .= this.getPrintableValue(item)
+            }
+            str .= "]"
+            return str
+        }
+
+        return value
+    }
+
     equal(actual, expected) {
-        if (actual != expected) {
-            throw Error("Assertion failed: " . actual . " != " . expected)
+        if (!AutoHotUnitAsserter.deepEqual(actual, expected)) {
+            throw Error("Assertion failed: " . AutoHotUnitAsserter.getPrintableValue(actual) . " != " . AutoHotUnitAsserter.getPrintableValue(expected))
         }
     }
 
@@ -215,7 +249,7 @@ class AutoHotUnitAsserter {
     }
 
     fail(message) {
-        throw "Assertion failed: " . message
+        throw Error("Assertion failed: " . message)
     }
     
     isAbove(actual, expected) {
